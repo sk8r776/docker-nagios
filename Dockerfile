@@ -20,18 +20,11 @@ ENV APP_NAME home.local
 ENV APP_USER admin
 ENV APP_PASS P@$$w0rd
 
-
-#**************************
-#*   Add Required Files   *
-#**************************
-ADD runconfig.sh /tmp/
-ADD index.html /tmp/
-
-
 #*************************
 #*  Update and Pre-Reqs  *
 #*************************
-RUN yum clean all && \
+RUN rpm -ihv http://opensource.is/repo/ok-release.rpm && \
+	yum clean all && \
 	yum -y update && \
 	rm -fr /var/cache/*
 
@@ -40,7 +33,13 @@ RUN yum clean all && \
 #*  Application Install  *
 #*************************
 # Install Nagios, adagios
-RUN yum install -y pnp4nagios mk-livestatus nagios git adagios nagios-plugins-all.x86_64 postfix
+RUN yum --enablerepo=ok-testing install -y pnp4nagios mk-livestatus nagios git adagios okconfig nagios-plugins-all.x86_64 postfix wget
+
+#**************************
+#*   Add Required Files   *
+#**************************
+RUN wget https://raw.githubusercontent.com/sk8r776/docker-nagios/master/runconfig.sh -O /tmp/runconfig.sh
+ADD wget https://raw.githubusercontent.com/sk8r776/docker-nagios/master/index.html -O /tmp/index.html
 
 # Add HTML Index file for check_http check
 RUN mv /tmp/index.html /var/www/html/
